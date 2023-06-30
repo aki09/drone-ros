@@ -4,10 +4,13 @@ import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import NavSatFix
 from mavros_msgs.srv import *
+from mavros_msgs.msg import *
 
 class Drone():
     def __init__(self):
         self.position_subscriber = rospy.Subscriber("/mavros/global_position/raw/fix", NavSatFix, self.global_position_callback)
+        self.movement_publisher = rospy.Publisher("mavros/setpoint_raw/local", PositionTarget, queue_size=10)
+        rate = rospy.Rate(5)
         self.latitude = 0
         self.longitude = 0
 
@@ -57,6 +60,23 @@ class Drone():
         except rospy.ServiceException as e:
             print("service set_mode call failed: %s."%e)
 
+    def move(self):
+        rospy.loginfo('Start')
+        pos = PositionTarget()
+        pos.coordinate_frame = PositionTarget.FRAME_BODY_OFFSET_NED
+        pos.header.frame_id = 'Drone'
+        pos.type_mask = PositionTarget.IGNORE_PX | PositionTarget.IGNORE_PY | PositionTarget.IGNORE_PZ \
+                        | PositionTarget.IGNORE_AFX | PositionTarget.IGNORE_AFY | PositionTarget.IGNORE_AFZ \
+                        | PositionTarget.IGNORE_YAW | PositionTarget.IGNORE_YAW_RATE
+        pos.velocity.x = 5.0
+        pos.velocity.y = 0.0         
+        pos.velocity.z = 0.0
+
+        while not rospy.is_shutdown():
+            self.movement_publisher.publish(pos)
+
+
+
 def my_loop(drone: Drone):
     x='1'
     while ((not rospy.is_shutdown())and (x in ['1','2','3','4','5','6','7'])):
@@ -74,6 +94,8 @@ def my_loop(drone: Drone):
             drone.takeoff(alt=3)
         elif(x=='6'):
             drone.land()
+        elif(x=='7'):
+            drone.move()
         else: 
             print ("Exit")
 
@@ -86,7 +108,7 @@ def menu():
     print ("4: to set mode to DISARM the drone")
     print ("5: to set mode to TAKEOFF")
     print ("6: to set mode to LAND")
-    print ("7: Position")
+    print ("7: Move")
     print ("8: Exit")
 
 if __name__ == '__main__':
