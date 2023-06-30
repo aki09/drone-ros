@@ -68,9 +68,21 @@ class Drone():
         pos.type_mask = PositionTarget.IGNORE_PX | PositionTarget.IGNORE_PY | PositionTarget.IGNORE_PZ \
                         | PositionTarget.IGNORE_AFX | PositionTarget.IGNORE_AFY | PositionTarget.IGNORE_AFZ \
                         | PositionTarget.IGNORE_YAW | PositionTarget.IGNORE_YAW_RATE
-        pos.velocity.x = 5.0
-        pos.velocity.y = 0.0         
+        
+        pos.velocity.x = -0.5
+        pos.velocity.y = 0.0  
         pos.velocity.z = 0.0
+
+        pos.acceleration_or_force.x = 0.0
+        pos.acceleration_or_force.y = 0.0
+        pos.acceleration_or_force.z = 0.0
+
+        pos.position.x = 0.0
+        pos.position.y = 0.0
+        pos.position.z = 0.0
+
+        pos.yaw = 0.0
+        pos.yaw_rate = 0.0
 
         while not rospy.is_shutdown():
             self.movement_publisher.publish(pos)
