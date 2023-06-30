@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="drone_movement" type="drone_move.py" name="drone_move" output="screen" />
+    <include file="/home/neshtek/flynovate_ros/src/launch/src/apm.launch" />
+</launch>
