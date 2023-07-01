@@ -11,6 +11,9 @@ class Drone():
     def __init__(self):
         self.coordinate_subscriber = rospy.Subscriber("/mavros/global_position/raw/fix", NavSatFix, self.global_position_callback)
         self.movement_publisher = rospy.Publisher("/mavros/setpoint_velocity/cmd_vel_unstamped", Twist, queue_size=10)
+        rospy.wait_for_service('/mavros/setpoint_velocity/mav_frame')
+        frame_service = rospy.ServiceProxy('/mavros/setpoint_velocity/mav_frame', SetMavFrame)
+        self.is_frame_set = frame_service(9)
         self.latitude = 0
         self.longitude = 0
 
@@ -66,11 +69,8 @@ class Drone():
 
     def move(self):
         rospy.loginfo('Start')
-        # pos = PositionTarget()
-        frame_service = rospy.ServiceProxy('/mavros/setpoint_velocity/mav_frame', SetMavFrame)
-        is_frame_set = frame_service(9)
 
-        if is_frame_set:
+        if self.is_frame_set:
             pos = Twist()
             pos.linear.x = 0.0
             pos.linear.y = 0.0
@@ -82,17 +82,6 @@ class Drone():
             while not rospy.is_shutdown():
                 self.movement_publisher.publish(pos)
                 rate.sleep()
-
-
-        # pos.coordinate_frame = PositionTarget.FRAME_BODY_OFFSET_NED
-        # pos.header.frame_id = 'Drone'
-        # pos.type_mask = PositionTarget.IGNORE_PX | PositionTarget.IGNORE_PY | PositionTarget.IGNORE_PZ |\
-        #                 PositionTarget.IGNORE_AFX | PositionTarget.IGNORE_AFY | PositionTarget.IGNORE_AFZ |\
-        #                 PositionTarget.IGNORE_YAW | PositionTarget.IGNORE_YAW_RATE
-        
-        # pos.velocity.x = -0.5
-        # pos.velocity.y = 0.0  
-        # pos.velocity.z = 0.0
 
 def menu(drone: Drone):
     while not rospy.is_shutdown():
