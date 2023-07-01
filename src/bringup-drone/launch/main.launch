@@ -1,4 +1,4 @@
 <launch>
-    <node pkg="drone_movement" type="drone_move.py" name="drone_move" output="screen"/>
+    <node pkg="drone_movement" type="drone_move.py" name="drone_move" output="screen" launch-prefix="gnome-terminal -e" />
     <include file="$(find bringup-drone)/launch/apm.launch" />
 </launch>
